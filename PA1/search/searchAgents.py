@@ -288,7 +288,7 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
         self.costFn = lambda x: 1
         
-        #keep track of the position of pacman and which of the four corners
+        #Keep track of the position of pacman and which of the four corners
         #have been visited. All corners start unvisited.
         self.startState = (self.startingPosition, False, False, False, False)
 
@@ -305,9 +305,7 @@ class CornersProblem(search.SearchProblem):
         """
         #Check that all corners have been visited.
         position,  corner1, corner2, corner3, corner4 = state
-        if(corner1 and corner2 and corner3 and corner4):
-            return True
-        return False
+        return corner1 and corner2 and corner3 and corner4
 
     def getSuccessors(self, state):
         """
@@ -326,10 +324,14 @@ class CornersProblem(search.SearchProblem):
             x,y = position
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+
             if not self.walls[nextx][nexty]:
                 newState = (nextx, nexty)
                 corner1, corner2, corner3, corner4 = self.corners
-                nextState = (newState, corner1Visited or (corner1 == newState),
+                
+                #Update corners if the next state will visit them.
+                nextState = (newState, 
+                 corner1Visited or (corner1 == newState),
                  corner2Visited or (corner2 == newState),
                  corner3Visited or (corner3 == newState),
                  corner4Visited or (corner4 == newState))
@@ -370,12 +372,9 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     position, corner1Visited, corner2Visited, corner3Visited, corner4Visited = state
-    visited = ((corner1Visited, corner1), (corner2Visited, corner2), (corner3Visited, corner3), (corner4Visited, corner4))
-    filteredVisited = filter(lambda x: not x[1], visited)
-    
-    distances = map(lambda x: (x[0], util.manhattanDistance(x[0], position)), filteredVisited)
 
-
+    #For every unvisited corner, find the distance between current position and it.
+    #We must travel atleast the distance from here to the farthest corner.
     distanceList = []
     if not corner1Visited:
         distanceList.append(util.manhattanDistance(position, corner1))
@@ -483,12 +482,30 @@ def foodHeuristic(state, problem):
     foodPos = foodGrid.asList()
     if len(foodPos) == 0:
         return 0
+
+    #Get distances between current position and all remaining food. Find the closest
+    #food.
     distances = map(lambda x: (x, util.manhattanDistance(position, x)), foodPos)
     closest =  min(distances, key = lambda x: x[1])
+
+    #Now we find the distances between the closest food and all other foods. We must 
+    #travel from there to atleast the furthest food.
     distancesFromClosest = map(lambda x: util.manhattanDistance(closest[0], x), foodPos)
     farthest = max(distancesFromClosest)
-    return closest[1] + farthest
-    # return len(foodLeft)
+    
+    maxDistance = -1
+    for pos1 in foodPos:
+        for pos2 in foodPos:
+            distance = util.manhattanDistance(pos1, pos2)
+            if distance > maxDistance:
+                maxDistance = distance
+
+    foodLeft = len(foodPos) - 3
+    if(foodLeft < 0):
+        foodLeft = 0
+
+    # return closest[1] + farthest
+    return maxDistance + closest[1]  + foodLeft
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -518,6 +535,7 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
+        #BFS will find the nearest dot
         return search.bfs(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
