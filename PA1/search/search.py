@@ -75,15 +75,15 @@ def tinyMazeSearch(problem):
 
 def depthFirstSearch(problem):
     """Search the deepest nodes in the search tree first."""
-    return genericSearch(problem, util.Stack(), nullHeuristic)
+    return genericSearch(problem, util.Stack())
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    return genericSearch(problem, util.Queue(), nullHeuristic)
+    return genericSearch(problem, util.Queue())
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    return genericSearch(problem, util.PriorityQueueWithFunction(stateCost), nullHeuristic)
+    return genericSearch(problem, util.PriorityQueueWithFunction(stateCost))
 
 def nullHeuristic(state, problem=None):
     """
@@ -96,8 +96,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     return genericSearch(problem, util.PriorityQueueWithFunction(heuristicCost), heuristic)
 
-def genericSearch(problem, queue, heuristic):
-    """Search a problem while storing the nextstates in the given datastructure"""
+def genericSearch(problem, queue, heuristic=nullHeuristic):
+    """Search a problem while storing the next states to search, in the given data structure"""
     visitedStates = util.Counter()
     start = problem.getStartState()
 
@@ -121,7 +121,6 @@ def genericSearch(problem, queue, heuristic):
 def stateCost(state):
     """Retrieve the cost from a state"""
     position, path, cost, heuristic = state
-    # print "For state ", position, " the cost is ", cost
     return cost
 
 def heuristicCost(state):
