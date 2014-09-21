@@ -488,11 +488,6 @@ def foodHeuristic(state, problem):
     distances = map(lambda x: (x, util.manhattanDistance(position, x)), foodPos)
     closest =  min(distances, key = lambda x: x[1])
 
-    #Now we find the distances between the closest food and all other foods. We must 
-    #travel from there to atleast the furthest food.
-    distancesFromClosest = map(lambda x: util.manhattanDistance(closest[0], x), foodPos)
-    farthest = max(distancesFromClosest)
-    
     maxDistance = -1
     for pos1 in foodPos:
         for pos2 in foodPos:
@@ -500,12 +495,8 @@ def foodHeuristic(state, problem):
             if distance > maxDistance:
                 maxDistance = distance
 
-    foodLeft = len(foodPos) - 3
-    if(foodLeft < 0):
-        foodLeft = 0
-
-    # return closest[1] + farthest
-    return maxDistance + closest[1]  + foodLeft
+    #This is the greatest distance between any points plus the distance to the closest points.
+    return maxDistance + closest[1]
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
