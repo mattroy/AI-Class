@@ -188,7 +188,7 @@ class ApproximateQAgent(PacmanQAgent):
         """
         features = self.featExtractor.getFeatures(state, action)
         maxAction = float("-inf")
-        for nextAction in self.getLegalActions(state):
+        for nextAction in self.getLegalActions(nextState):
           maxAction = max(maxAction, self.getQValue(nextState, nextAction))
 
         if maxAction == float("-inf"):
